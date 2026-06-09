@@ -38,3 +38,7 @@ build/
 
 ### Runtime uploads ###
 uploads/
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/

@@ -119,9 +119,30 @@ Run tests:
 .\mvnw.cmd test
 ```
 
+Run the frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+Build the frontend:
+
+```powershell
+cd frontend
+npm run build
+```
+
 ## Frontend Roadmap
 
-The backend is ready for a React or Next.js frontend with these screens:
+The React frontend includes these screens:
 
 - KYC submission
 - Admin KYC approval
