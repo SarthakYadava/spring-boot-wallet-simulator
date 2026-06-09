@@ -28,10 +28,10 @@ const initialFunding = {
 };
 
 const initialKyc = {
-  userEmail: "sender@example.com",
+  userEmail: "new.user@example.com",
   documentType: "NATIONAL_ID",
-  documentNumber: "DOC-1001",
-  mobileNumber: "9876543210"
+  documentNumber: "DOC-2001",
+  mobileNumber: "9000000001"
 };
 
 function App() {

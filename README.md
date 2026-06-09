@@ -81,7 +81,7 @@ The app reads local settings from environment variables:
 | `DB_USERNAME` | `root` |
 | `DB_PASSWORD` | empty |
 | `KYC_UPLOAD_DIRECTORY` | `uploads/kyc-documents` |
-| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost:3000` |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000` |
 
 PowerShell example:
 
@@ -90,7 +90,7 @@ $env:DB_URL="jdbc:mysql://localhost:3306/wallet_db"
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your-local-password"
 $env:KYC_UPLOAD_DIRECTORY="uploads/kyc-documents"
-$env:CORS_ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000"
+$env:CORS_ALLOWED_ORIGINS="http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
 ```
 
 ## Run Locally
@@ -105,6 +105,19 @@ Run the app:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+Run the app with the in-memory dev database:
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+The dev profile seeds two demo wallets:
+
+```text
+9876543210@upi
+9123456780@upi
 ```
 
 Open the API contract:
