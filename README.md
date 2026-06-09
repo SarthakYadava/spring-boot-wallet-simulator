@@ -157,6 +157,7 @@ npm run build
 
 The React frontend includes these screens:
 
+- Overview dashboard with wallet KPIs and demo flow
 - KYC submission
 - Admin KYC approval
 - Wallet dashboard
@@ -164,6 +165,13 @@ The React frontend includes these screens:
 - Send money
 - Transaction history
 - Failure/refund simulator
+
+Demo flow:
+
+1. Start the backend with the `dev` profile.
+2. Open the frontend at `http://localhost:5173`.
+3. Load the seeded wallet `9876543210@upi`.
+4. Fund the wallet, send money, and view ledger history.
 
 ## Suggested Commit Milestones
 
