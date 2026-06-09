@@ -47,6 +47,7 @@ All successful responses use this shape:
 | POST | `/api/v1/wallet/simulate-failure` | Debit, simulate receiver-bank failure, then refund. |
 | GET | `/api/v1/wallet/{upiId}` | Fetch wallet balance and profile summary. |
 | GET | `/api/v1/wallet/{upiId}/transactions` | Fetch recent wallet ledger entries. |
+| GET | `/api-docs` | OpenAPI contract for frontend development. |
 
 ## Example Requests
 
@@ -80,6 +81,7 @@ The app reads local settings from environment variables:
 | `DB_USERNAME` | `root` |
 | `DB_PASSWORD` | empty |
 | `KYC_UPLOAD_DIRECTORY` | `uploads/kyc-documents` |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost:3000` |
 
 PowerShell example:
 
@@ -88,6 +90,7 @@ $env:DB_URL="jdbc:mysql://localhost:3306/wallet_db"
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your-local-password"
 $env:KYC_UPLOAD_DIRECTORY="uploads/kyc-documents"
+$env:CORS_ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000"
 ```
 
 ## Run Locally
@@ -102,6 +105,12 @@ Run the app:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+Open the API contract:
+
+```text
+http://localhost:8080/api-docs
 ```
 
 Run tests:
