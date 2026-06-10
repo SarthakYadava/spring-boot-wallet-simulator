@@ -2,6 +2,8 @@
 
 A personal Spring Boot learning project that models a small UPI-style wallet system. It focuses on KYC onboarding, wallet activation, simulated bank funding, peer-to-peer transfers, transaction history, and refund compensation when an external receiver bank fails.
 
+![Wallet Studio login screen](docs/screenshots/auth-screen.png)
+
 ## Why I Built This
 
 This project is meant to practice backend concepts that matter in financial systems:
@@ -101,22 +103,24 @@ $env:JWT_SECRET="replace-this-with-a-long-local-secret"
 
 ## Run Locally
 
-Create a database:
+### Backend
+
+For a quick demo, run the backend with the in-memory dev database:
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+For MySQL runtime, create the database first:
 
 ```sql
 CREATE DATABASE wallet_db;
 ```
 
-Run the app:
+Then run the app:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
-```
-
-Run the app with the in-memory dev database:
-
-```powershell
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 The dev profile seeds two demo wallets:
@@ -145,6 +149,8 @@ Run tests:
 .\mvnw.cmd test
 ```
 
+### Frontend
+
 Run the frontend:
 
 ```powershell
@@ -166,7 +172,7 @@ cd frontend
 npm run build
 ```
 
-## Frontend Roadmap
+## Demo Flow
 
 The React frontend includes these screens:
 
@@ -179,23 +185,11 @@ The React frontend includes these screens:
 - Transaction history
 - Failure/refund simulator
 
-Demo flow:
-
 1. Start the backend with the `dev` profile.
 2. Open the frontend at `http://localhost:5173`.
 3. Sign in with `admin@wallet.dev / Admin@123`.
 4. Load the seeded wallet `9876543210@upi`.
 5. Fund the wallet, send money, approve KYC, and view ledger history.
-
-## Suggested Commit Milestones
-
-1. Backend cleanup and project rename
-2. JSON API response contracts
-3. Wallet summary and transaction history endpoints
-4. Integration tests for KYC, funding, and transfers
-5. Frontend scaffold and dashboard layout
-6. Frontend API integration
-7. Final README screenshots and deployment notes
 
 ## Publishing Notes
 
