@@ -9,19 +9,24 @@ import {
   Clock3,
   FileUp,
   History,
+  KeyRound,
   Landmark,
   Loader2,
+  LogIn,
+  LogOut,
   RefreshCcw,
   Search,
   SendHorizontal,
   ShieldCheck,
   Sparkles,
   UploadCloud,
+  UserPlus,
   Wallet
 } from "lucide-react";
 import "./styles.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const AUTH_STORAGE_KEY = "wallet-studio-auth";
 const DEMO_SENDER_UPI = "9876543210@upi";
 const DEMO_RECEIVER_UPI = "9123456780@upi";
 
@@ -44,8 +49,26 @@ const initialKyc = {
   mobileNumber: "9000000001"
 };
 
+const initialAuthForm = {
+  fullName: "Demo Admin",
+  email: "admin@wallet.dev",
+  password: "Admin@123"
+};
+
+function readStoredAuth() {
+  try {
+    const value = localStorage.getItem(AUTH_STORAGE_KEY);
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [auth, setAuth] = useState(() => readStoredAuth());
+  const [authMode, setAuthMode] = useState("login");
+  const [authForm, setAuthForm] = useState(initialAuthForm);
   const [lookupUpi, setLookupUpi] = useState(DEMO_SENDER_UPI);
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -117,19 +140,75 @@ function App() {
   );
 
   useEffect(() => {
-    refreshWallet(DEMO_SENDER_UPI, { silent: true });
-  }, []);
+    if (auth?.token) {
+      refreshWallet(DEMO_SENDER_UPI, { silent: true });
+    }
+  }, [auth?.token]);
 
   async function request(path, options = {}) {
-    const response = await fetch(`${API_BASE_URL}${path}`, options);
+    const { auth: needsAuth = true, headers: optionHeaders, ...fetchOptions } = options;
+    const headers = new Headers(optionHeaders || {});
+
+    if (needsAuth && auth?.token) {
+      headers.set("Authorization", `Bearer ${auth.token}`);
+    }
+
+    if (fetchOptions.body && !(fetchOptions.body instanceof FormData) && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...fetchOptions,
+      headers
+    });
     const text = await response.text();
     const payload = text ? JSON.parse(text) : {};
 
     if (!response.ok) {
+      if (response.status === 401 && needsAuth) {
+        logout({ quiet: true });
+        throw new Error("Session expired. Sign in again.");
+      }
       throw new Error(payload.message || "Request failed");
     }
 
     return payload;
+  }
+
+  async function submitAuth(event) {
+    event.preventDefault();
+    await runAction(
+      "auth",
+      async () => {
+        const endpoint = authMode === "login" ? "/api/v1/auth/login" : "/api/v1/auth/register";
+        const payload = authMode === "login"
+          ? { email: authForm.email, password: authForm.password }
+          : authForm;
+
+        const result = await request(endpoint, {
+          method: "POST",
+          auth: false,
+          body: JSON.stringify(payload)
+        });
+
+        setAuth(result.data);
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(result.data));
+        setActiveTab("overview");
+        return result;
+      },
+      authMode === "login" ? "Signed in" : "Account created"
+    );
+  }
+
+  function logout(options = {}) {
+    setAuth(null);
+    setWallet(null);
+    setTransactions([]);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+
+    if (!options.quiet) {
+      setStatus({ type: "idle", message: "Signed out" });
+    }
   }
 
   async function runAction(actionName, action, successMessage) {
@@ -282,9 +361,9 @@ function App() {
         <div className="sidebar-card">
           <span>Demo sender</span>
           <strong>{DEMO_SENDER_UPI}</strong>
-          <button type="button" onClick={loadDemoWallet} disabled={isBusy}>
-            <RefreshCcw size={16} />
-            Load Demo
+          <button type="button" onClick={auth ? loadDemoWallet : undefined} disabled={isBusy || !auth}>
+            {auth ? <RefreshCcw size={16} /> : <KeyRound size={16} />}
+            {auth ? "Load Demo" : "Sign in first"}
           </button>
         </div>
       </aside>
@@ -295,16 +374,31 @@ function App() {
             <p className="eyebrow">Local full-stack workspace</p>
             <h2>{sectionTitle(activeTab)}</h2>
           </div>
-          <StatusBadge status={status} />
+          <div className="topbar-actions">
+            {auth && <UserBadge auth={auth} onLogout={logout} />}
+            <StatusBadge status={status} />
+          </div>
         </header>
 
-        <section className="stats-grid">
-          {stats.map((stat) => (
-            <StatCard stat={stat} key={stat.label} />
-          ))}
-        </section>
+        {!auth ? (
+          <AuthPanel
+            authMode={authMode}
+            setAuthMode={setAuthMode}
+            authForm={authForm}
+            setAuthForm={setAuthForm}
+            submitAuth={submitAuth}
+            busyAction={busyAction}
+            isBusy={isBusy}
+          />
+        ) : (
+          <>
+            <section className="stats-grid">
+              {stats.map((stat) => (
+                <StatCard stat={stat} key={stat.label} />
+              ))}
+            </section>
 
-        {activeTab === "overview" && (
+            {activeTab === "overview" && (
           <section className="overview-grid">
             <WalletHero
               wallet={wallet}
@@ -318,9 +412,9 @@ function App() {
             <FundingPanel funding={funding} setFunding={setFunding} fundWallet={fundWallet} isBusy={isBusy} busyAction={busyAction} />
             <MiniLedger transactions={transactions} onViewHistory={() => setActiveTab("history")} />
           </section>
-        )}
+            )}
 
-        {activeTab === "kyc" && (
+            {activeTab === "kyc" && (
           <section className="panel-grid">
             <form className="panel form-panel" onSubmit={submitKyc}>
               <PanelTitle icon={UploadCloud} title="Submit KYC" subtitle="Create a pending customer profile with a document upload." />
@@ -357,9 +451,9 @@ function App() {
               </PrimaryButton>
             </form>
           </section>
-        )}
+            )}
 
-        {activeTab === "transfer" && (
+            {activeTab === "transfer" && (
           <section className="transfer-layout">
             <form className="panel transfer-panel" onSubmit={sendMoney}>
               <PanelTitle icon={SendHorizontal} title="Send Money" subtitle="Move funds between two active demo wallets." />
@@ -392,9 +486,9 @@ function App() {
               </div>
             </div>
           </section>
-        )}
+            )}
 
-        {activeTab === "history" && (
+            {activeTab === "history" && (
           <section className="history-layout">
             <div className="panel wide">
               <div className="panel-header">
@@ -406,6 +500,8 @@ function App() {
               <TransactionTable transactions={transactions} />
             </div>
           </section>
+            )}
+          </>
         )}
       </section>
     </main>
@@ -441,6 +537,91 @@ function WalletHero({ wallet, lookupUpi, setLookupUpi, loadWallet, isBusy, busyA
         </label>
       </form>
     </section>
+  );
+}
+
+function AuthPanel({ authMode, setAuthMode, authForm, setAuthForm, submitAuth, busyAction, isBusy }) {
+  const isLogin = authMode === "login";
+
+  return (
+    <section className="auth-layout">
+      <div className="auth-visual">
+        <div className="auth-emblem">
+          <ShieldCheck size={42} />
+        </div>
+        <p className="eyebrow">JWT secured workspace</p>
+        <h3>Sign in to run wallet operations</h3>
+        <p>
+          Demo mode includes seeded admin and user accounts, protected wallet APIs, and admin-only KYC approval.
+        </p>
+        <div className="credential-grid">
+          <div>
+            <span>Admin</span>
+            <strong>admin@wallet.dev</strong>
+            <small>Admin@123</small>
+          </div>
+          <div>
+            <span>User</span>
+            <strong>user@wallet.dev</strong>
+            <small>User@123</small>
+          </div>
+        </div>
+      </div>
+
+      <form className="panel auth-panel" onSubmit={submitAuth}>
+        <PanelTitle
+          icon={isLogin ? LogIn : UserPlus}
+          title={isLogin ? "Welcome Back" : "Create Account"}
+          subtitle={isLogin ? "Use the seeded admin account for the full demo." : "Create a user account for protected wallet access."}
+        />
+        <div className="segmented-control">
+          <button className={isLogin ? "active" : ""} type="button" onClick={() => setAuthMode("login")}>
+            <LogIn size={16} />
+            Login
+          </button>
+          <button className={!isLogin ? "active" : ""} type="button" onClick={() => setAuthMode("register")}>
+            <UserPlus size={16} />
+            Register
+          </button>
+        </div>
+
+        {!isLogin && (
+          <Field
+            label="Full Name"
+            value={authForm.fullName}
+            onChange={(value) => setAuthForm({ ...authForm, fullName: value })}
+          />
+        )}
+        <Field
+          label="Email"
+          value={authForm.email}
+          onChange={(value) => setAuthForm({ ...authForm, email: value })}
+        />
+        <Field
+          label="Password"
+          type="password"
+          value={authForm.password}
+          onChange={(value) => setAuthForm({ ...authForm, password: value })}
+        />
+        <PrimaryButton type="submit" icon={isLogin ? LogIn : UserPlus} busy={busyAction === "auth"} disabled={isBusy}>
+          {isLogin ? "Sign In" : "Create Account"}
+        </PrimaryButton>
+      </form>
+    </section>
+  );
+}
+
+function UserBadge({ auth, onLogout }) {
+  return (
+    <div className="user-badge">
+      <div>
+        <span>{auth.role}</span>
+        <strong>{auth.fullName}</strong>
+      </div>
+      <button type="button" onClick={() => onLogout()} title="Sign out">
+        <LogOut size={17} />
+      </button>
+    </div>
   );
 }
 

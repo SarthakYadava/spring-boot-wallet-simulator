@@ -19,6 +19,7 @@ This project is meant to practice backend concepts that matter in financial syst
 - Java 17
 - Spring Boot
 - Spring Web MVC
+- Spring Security with JWT
 - Spring Data JPA and Hibernate
 - MySQL for local runtime
 - H2 for tests
@@ -40,6 +41,8 @@ All successful responses use this shape:
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
+| POST | `/api/v1/auth/register` | Create a user account and return a JWT. |
+| POST | `/api/v1/auth/login` | Sign in and return a JWT. |
 | POST | `/api/v1/wallet/kyc/upload` | Submit KYC metadata and a document file. |
 | POST | `/api/v1/admin/kyc/{kycId}/approve` | Approve KYC and activate a wallet. |
 | POST | `/api/v1/wallet/fund` | Add simulated bank funds to a wallet. |
@@ -82,6 +85,8 @@ The app reads local settings from environment variables:
 | `DB_PASSWORD` | empty |
 | `KYC_UPLOAD_DIRECTORY` | `uploads/kyc-documents` |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000` |
+| `JWT_SECRET` | `wallet-simulator-local-dev-secret-key` |
+| `JWT_EXPIRATION_SECONDS` | `86400` |
 
 PowerShell example:
 
@@ -91,6 +96,7 @@ $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your-local-password"
 $env:KYC_UPLOAD_DIRECTORY="uploads/kyc-documents"
 $env:CORS_ALLOWED_ORIGINS="http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+$env:JWT_SECRET="replace-this-with-a-long-local-secret"
 ```
 
 ## Run Locally
@@ -118,6 +124,13 @@ The dev profile seeds two demo wallets:
 ```text
 9876543210@upi
 9123456780@upi
+```
+
+It also seeds two demo accounts:
+
+```text
+admin@wallet.dev / Admin@123
+user@wallet.dev / User@123
 ```
 
 Open the API contract:
@@ -170,8 +183,9 @@ Demo flow:
 
 1. Start the backend with the `dev` profile.
 2. Open the frontend at `http://localhost:5173`.
-3. Load the seeded wallet `9876543210@upi`.
-4. Fund the wallet, send money, and view ledger history.
+3. Sign in with `admin@wallet.dev / Admin@123`.
+4. Load the seeded wallet `9876543210@upi`.
+5. Fund the wallet, send money, approve KYC, and view ledger history.
 
 ## Suggested Commit Milestones
 
