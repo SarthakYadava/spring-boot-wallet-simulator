@@ -172,6 +172,14 @@ cd frontend
 npm run build
 ```
 
+The frontend uses the deployed Render API by default:
+
+```text
+https://spring-boot-wallet-simulator.onrender.com
+```
+
+Set `VITE_API_BASE_URL` to override the backend URL for another environment.
+
 ## Deploy Backend on Render
 
 Create a Render **Web Service** from this repository and select the **Docker** runtime. The included `Dockerfile` builds and runs the Spring Boot backend.

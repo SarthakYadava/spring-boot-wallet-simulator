@@ -25,7 +25,8 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://spring-boot-wallet-simulator.onrender.com";
 const AUTH_STORAGE_KEY = "wallet-studio-auth";
 const DEMO_SENDER_UPI = "9876543210@upi";
 const DEMO_RECEIVER_UPI = "9123456780@upi";
@@ -80,7 +81,7 @@ function App() {
   const [busyAction, setBusyAction] = useState("");
   const [status, setStatus] = useState({
     type: "idle",
-    message: "Ready for local demo"
+    message: "Connected to the wallet API"
   });
 
   const isBusy = Boolean(busyAction);
@@ -130,7 +131,7 @@ function App() {
       },
       {
         label: "API Status",
-        value: status.type === "error" ? "Check API" : "Local",
+        value: status.type === "error" ? "Check API" : "Online",
         detail: API_BASE_URL,
         icon: ShieldCheck,
         tone: status.type === "error" ? "red" : "mint"
@@ -371,7 +372,7 @@ function App() {
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Local full-stack workspace</p>
+            <p className="eyebrow">Full-stack wallet workspace</p>
             <h2>{sectionTitle(activeTab)}</h2>
           </div>
           <div className="topbar-actions">
