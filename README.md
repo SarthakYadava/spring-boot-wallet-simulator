@@ -172,6 +172,20 @@ cd frontend
 npm run build
 ```
 
+## Deploy Backend on Render
+
+Create a Render **Web Service** from this repository and select the **Docker** runtime. The included `Dockerfile` builds and runs the Spring Boot backend.
+
+For a simple portfolio demo, add these environment variables:
+
+```text
+SPRING_PROFILES_ACTIVE=dev
+JWT_SECRET=replace-with-a-long-random-secret
+CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
+```
+
+Use `/api-docs` as the health check path. The dev profile uses an in-memory H2 database, so demo data resets whenever the service restarts.
+
 ## Demo Flow
 
 The React frontend includes these screens:
