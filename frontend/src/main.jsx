@@ -26,7 +26,8 @@ import {
 import "./styles.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://spring-boot-wallet-simulator.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "http://localhost:8080" : "");
+const API_DISPLAY_URL = API_BASE_URL || window.location.origin;
 const AUTH_STORAGE_KEY = "wallet-studio-auth";
 const DEMO_SENDER_UPI = "9876543210@upi";
 const DEMO_RECEIVER_UPI = "9123456780@upi";
@@ -132,7 +133,7 @@ function App() {
       {
         label: "API Status",
         value: status.type === "error" ? "Check API" : "Online",
-        detail: API_BASE_URL,
+        detail: API_DISPLAY_URL,
         icon: ShieldCheck,
         tone: status.type === "error" ? "red" : "mint"
       }

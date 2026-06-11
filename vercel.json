@@ -1,5 +1,12 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm --prefix frontend install",
   "buildCommand": "npm --prefix frontend run build",
-  "outputDirectory": "frontend/dist"
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://spring-boot-wallet-simulator.onrender.com/api/:path*"
+    }
+  ]
 }

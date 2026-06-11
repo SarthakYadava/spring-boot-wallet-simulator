@@ -172,7 +172,7 @@ cd frontend
 npm run build
 ```
 
-The frontend uses the deployed Render API by default:
+The deployed frontend proxies `/api` requests to the Render backend through Vercel:
 
 ```text
 https://spring-boot-wallet-simulator.onrender.com
