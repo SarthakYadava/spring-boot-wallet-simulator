@@ -23,6 +23,7 @@ import {
   UserPlus,
   Wallet
 } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 import "./styles.css";
 
 const API_BASE_URL =
@@ -506,6 +507,7 @@ function App() {
           </>
         )}
       </section>
+      <Analytics />
     </main>
   );
 }
