@@ -2,6 +2,8 @@
 
 A personal Spring Boot learning project that models a small UPI-style wallet system. It focuses on KYC onboarding, wallet activation, simulated bank funding, peer-to-peer transfers, transaction history, and refund compensation when an external receiver bank fails.
 
+**Live Demo:** [spring-boot-wallet-simulator.vercel.app](https://spring-boot-wallet-simulator.vercel.app/)
+
 ![Wallet Studio login screen](docs/screenshots/auth-screen.png)
 
 ## Why I Built This
